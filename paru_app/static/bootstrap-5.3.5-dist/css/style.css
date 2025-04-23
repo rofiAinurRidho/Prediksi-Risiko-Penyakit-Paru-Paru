@@ -1,0 +1,161 @@
+:root {
+    --primary-color: #3a7bd5;
+    --secondary-color: #00d2ff;
+    --dark-color: #2c3e50;
+    --light-color: #f8f9fa;
+  }
+
+  body {
+    background-color: #f5f7fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .navbar {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 15px 0;
+  }
+
+  .navbar-brand, .nav-link {
+    color: white !important;
+    font-weight: 500;
+  }
+
+  .nav-link.active {
+    font-weight: 600;
+    border-bottom: 2px solid white;
+  }
+
+   /* Konten Utama */
+   .halaman {
+    color: white; 
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    flex: 1;
+  }
+  
+  .main-content {
+    backdrop-filter: blur(5px);
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .form-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin-top: 30px;
+    margin-bottom: 50px;
+  }
+
+  .form-title {
+    color: var(--dark-color);
+    font-weight: 700;
+    margin-bottom: 30px;
+    text-align: center;
+    position: relative;
+  }
+
+  .form-title:after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 8px;
+  }
+
+  .form-select {
+    border-radius: 8px;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    transition: all 0.3s;
+  }
+
+  .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(58, 123, 213, 0.25);
+  }
+
+  .btn-predict {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s;
+  }
+
+  .btn-predict:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(58, 123, 213, 0.4);
+  }
+
+  .modal-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+  }
+
+  .progress-bar {
+    background-color: var(--primary-color);
+  }
+
+  .risk-high {
+    color: #dc3545;
+    font-weight: 700;
+  }
+
+  .risk-low {
+    color: #28a745;
+    font-weight: 700;
+  }
+
+  .table-container {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  table#riwayatTable {
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  table#riwayatTable th, table#riwayatTable td {
+    padding: 6px 10px;
+    text-align: center;
+  }
+
+  .section-card {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 0 15px rgba(0,0,0,0.05);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+.icon-title {
+    font-size: 1.5rem;
+    color: #4a5fc1;
+    margin-right: 10px;
+}
+.card-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+.custom-alert {
+    border-radius: 1rem;
+    border-left: 4px solid #ffc107;
+}

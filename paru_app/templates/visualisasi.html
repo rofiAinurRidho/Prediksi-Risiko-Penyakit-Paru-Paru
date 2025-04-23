@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Visualisasi Prediksi</title>
+  <link rel="stylesheet" href="static/bootstrap-5.3.5-dist/css/style.css">
+  <link rel="stylesheet" href="static/bootstrap-5.3.5-dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <!-- jQuery dan DataTables JS -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+          <a class="navbar-brand" href="/">
+            <i class="fas fa-home me-2"></i>Home
+          </a>
+          <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item"><a class="nav-link" href="/prediksi">Prediksi</a></li>
+              <li class="nav-item"><a class="nav-link active" href="/visualisasi">Visualisasi</a></li>
+              <li class="nav-item"><a class="nav-link" href="/tentang">Tentang Model</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">Riwayat Hasil Prediksi</h2>
+
+    <div class="mt-5 card p-4 shadow-sm">
+        <div class="table-container">
+          <table class="table table-bordered table-striped" id="riwayatTable">
+            <thead class="table-light">
+              <tr id="tableHead"></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <br><br><br>
+      <h2 class="text-center mb-4">Visualisasi</h2>
+      <br>
+
+     <!-- Dropdown dan Bar Chart Dinamis -->
+     <div class="card p-4 shadow-sm">
+        <h5 class="mb-3 text-center">Distribusi Berdasarkan Kategori</h5>
+  
+        <div class="mb-3">
+          <label for="kategoriSelect" class="form-label">Pilih Kategori:</label>
+          <select class="form-select" id="kategoriSelect">
+            <option value="usia_tua">Usia</option>
+            <option value="jenis_kelamin_wanita">Jenis Kelamin</option>
+            <option value="merokok_pasif">Merokok</option>
+            <option value="bekerja_ya">Bekerja</option>
+            <option value="aktivitas_begadang_ya">Aktivitas Begadang</option>
+            <option value="aktivitas_olahraga_sering">Aktivitas Olahraga</option>
+            <option value="asuransi_tidak">Asuransi</option>
+            <option value="penyakit_bawaan_tidak">Penyakit Bawaan</option>
+          </select>
+        </div>
+  
+        <canvas id="kategoriChart" height="100"></canvas>
+      </div>
+
+    <br><br>
+
+    <div class="text-center mb-5">
+    <h5>Ringkasan Risiko</h5>
+    <div style="max-width: 300px; margin: 0 auto;">
+        <canvas id="pieChart"></canvas>
+        <p class="mt-2" id="pie-desc"></p>
+    </div>
+    </div>
+
+    <div class="section-card">
+      <div class="card-title"><i class="bi bi-bar-chart-line icon-title"></i> Evaluasi Model</div>
+      <ul>
+          <li><strong>Akurasi:</strong> 91%</li>
+          <li><strong>Precision:</strong> 89%</li>
+          <li><strong>Recall:</strong> 93%</li>
+          <li><strong>F1-Score:</strong> 91%</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white py-4">
+    <div class="container">
+      <div class="text-center">
+        <p class="mb-0">© 2025 - Sistem Prediksi Risiko Penyakit Paru-Paru</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // PIE CHART
+  fetch('/visualisasi-data')
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) return alert("Gagal memuat data: " + data.error);
+
+      const ctx = document.getElementById('pieChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: ['Berisiko', 'Tidak Berisiko'],
+          datasets: [{
+            data: [data.berisiko, data.tidak_berisiko],
+            backgroundColor: ['#dc3545', '#198754']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+
+      // Tambahkan interpretasi singkat di bawah pie chart
+      const desc = document.getElementById('pie-desc');
+      const total = data.berisiko + data.tidak_berisiko;
+      if (total === 0) {
+        desc.textContent = "Belum ada data prediksi yang tersedia.";
+      } else {
+        desc.textContent = `Dari ${total} data prediksi, ada sebanyak ${data.berisiko}
+        yang termasuk dalam kategori berisiko dan ${data.tidak_berisiko} yang termasuk dalam kategori tidak berisiko.`;
+      }
+    });
+
+    // KATEGORI CHART DINAMIS
+    const kategoriSelect = document.getElementById('kategoriSelect');
+    const kategoriCtx = document.getElementById('kategoriChart').getContext('2d');
+    let kategoriChart;
+
+    function loadKategoriChart(kolom) {
+      fetch(`/visualisasi-kategori/${kolom}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) return alert("Gagal memuat data kategori: " + data.error);
+
+          if (kategoriChart) kategoriChart.destroy();
+
+          kategoriChart = new Chart(kategoriCtx, {
+            type: 'bar',
+            data: {
+              labels: data.labels,
+              datasets: [
+                {
+                  label: 'Berisiko',
+                  data: data.berisiko,
+                  backgroundColor: '#dc3545'
+                },
+                {
+                  label: 'Tidak Berisiko',
+                  data: data.tidak_berisiko,
+                  backgroundColor: '#198754'
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              scales: {
+                y: { beginAtZero: true, stepSize: 1 }
+              }
+            }
+          });
+        });
+    }
+
+    // Saat pertama kali load
+    loadKategoriChart(kategoriSelect.value);
+
+    // Saat dropdown berubah
+    kategoriSelect.addEventListener('change', () => {
+      loadKategoriChart(kategoriSelect.value);
+    });
+
+    // TABEL RIWAYAT PREDIKSI
+    fetch('/riwayat-prediksi')
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          alert("Gagal memuat tabel: " + data.error);
+          return;
+        }
+
+        const orderedKeys = [
+        'no', 'usia_tua', 'jenis_kelamin_wanita', 'merokok_pasif', 'bekerja_ya',
+        'rumah_tangga_ya', 'aktivitas_begadang_ya', 'aktivitas_olahraga_sering',
+        'asuransi_tidak', 'penyakit_bawaan_tidak', 'prediction', 'probability', 'timestamp'
+        ];
+
+        const labelMapping = {
+        'no': 'No',
+        'usia_tua': 'Kategori Usia',
+        'jenis_kelamin_wanita': 'Jenis Kelamin',
+        'merokok_pasif': 'Status Merokok',
+        'bekerja_ya': 'Status Bekerja',
+        'rumah_tangga_ya': 'Status Rumah Tangga',
+        'aktivitas_begadang_ya': 'Begadang',
+        'aktivitas_olahraga_sering': 'Olahraga',
+        'asuransi_tidak': 'Asuransi',
+        'penyakit_bawaan_tidak': 'Penyakit Bawaan',
+        'prediction': 'Hasil Prediksi',
+        'probability': 'Probabilitas',
+        'timestamp': 'Waktu Prediksi'
+        };
+
+
+        const labelMap = {
+          usia_tua: { 0: "Muda", 1: "Tua" },
+          jenis_kelamin_wanita: { 0: "Pria", 1: "Wanita" },
+          merokok_pasif: { 0: "Aktif", 1: "Pasif" },
+          bekerja_ya: { 0: "Tidak", 1: "Ya" },
+          rumah_tangga_ya: { 0: "Tidak", 1: "Ya" },
+          aktivitas_begadang_ya: { 0: "Tidak", 1: "Ya" },
+          aktivitas_olahraga_sering: { 0: "Jarang", 1: "Sering" },
+          asuransi_tidak: { 0: "Ada", 1: "Tidak" },
+          penyakit_bawaan_tidak: { 0: "Ada", 1: "Tidak" },
+          prediction: { 0: "Tidak Berisiko", 1: "Berisiko" }
+        };
+
+        const thead = document.getElementById('tableHead');
+        thead.innerHTML = '';
+        orderedKeys.forEach(key => {
+          const th = document.createElement('th');
+          th.textContent = labelMapping[key] || key; // pakai label mapping
+          thead.appendChild(th);
+        });
+
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        data.forEach((row, index) => {
+          const tr = document.createElement('tr');
+          orderedKeys.forEach(key => {
+            const td = document.createElement('td');
+            let value = row[key];
+
+            if (key === 'no') value = index + 1;
+            else if (labelMap[key] && value in labelMap[key]) value = labelMap[key][value];
+
+            td.textContent = value ?? '-';
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+      });
+
+    // Inisialisasi DataTables
+    setTimeout(() => {
+      $('#riwayatTable').DataTable({
+        paging: true,
+        searching: true,
+        ordering: true,
+        lengthMenu: [5, 10, 25, 50],
+        pageLength: 5,
+        language: {
+          search: "Cari:",
+          lengthMenu: "Tampilkan _MENU_ data",
+          info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+          paginate: {
+            first: "Awal",
+            last: "Akhir",
+            next: "Berikutnya",
+            previous: "Sebelumnya"
+          },
+          zeroRecords: "Tidak ada data yang cocok"
+        }
+      });
+    }, 200);
+
+  </script>
+</body>
+</html>

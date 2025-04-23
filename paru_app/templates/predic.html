@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Form Prediksi</title>
+  <link rel="stylesheet" href="static/bootstrap-5.3.5-dist/css/style.css">
+  <link rel="stylesheet" href="static/bootstrap-5.3.5-dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <!-- Navigasi -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+      <a class="navbar-brand" href="/">
+        <i class="fas fa-home me-2"></i>Home
+      </a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link active" href="/prediksi">Prediksi</a></li>
+          <li class="nav-item"><a class="nav-link" href="/visualisasi">Visualisasi</a></li>
+          <li class="nav-item"><a class="nav-link" href="/tentang">Tentang Model</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Form Prediksi -->
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">Form Prediksi Risiko Penyakit Paru-Paru</h2>
+    <form id="predict-form">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label>Usia</label>
+            <select name="usia_tua" class="form-select">
+              <option value="0">Muda</option>
+              <option value="1">Tua</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label>Jenis Kelamin</label>
+            <select name="jenis_kelamin_wanita" class="form-select">
+              <option value="0">Pria</option>
+              <option value="1">Wanita</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label>Merokok</label>
+            <select name="merokok_pasif" class="form-select">
+              <option value="0">Aktif</option>
+              <option value="1">Pasif</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label>Bekerja</label>
+            <select name="bekerja_ya" class="form-select">
+              <option value="0">Tidak</option>
+              <option value="1">Ya</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label>Rumah Tangga</label>
+            <select name="rumah_tangga_ya" class="form-select">
+              <option value="0">Tidak</option>
+              <option value="1">Ya</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label>Begadang</label>
+            <select name="aktivitas_begadang_ya" class="form-select">
+              <option value="0">Tidak</option>
+              <option value="1">Ya</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label>Olahraga</label>
+            <select name="aktivitas_olahraga_sering" class="form-select">
+              <option value="0">Jarang</option>
+              <option value="1">Sering</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label>Asuransi</label>
+            <select name="asuransi_tidak" class="form-select">
+              <option value="0">Ada</option>
+              <option value="1">Tidak</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label>Penyakit Bawaan</label>
+            <select name="penyakit_bawaan_tidak" class="form-select">
+              <option value="0">Ada</option>
+              <option value="1">Tidak</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 mt-4">Prediksi</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Modal Hasil -->
+  <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="resultModalLabel">Hasil Prediksi</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Status:</strong> <span id="prediction-result"></span></p>
+          <p><strong>Probabilitas:</strong> <span id="probability-result"></span></p>
+          <p id="explanation"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white py-4">
+    <div class="container">
+      <div class="text-center">
+        <p class="mb-0">© 2025 - Sistem Prediksi Risiko Penyakit Paru-Paru</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JS -->
+  <script src="static/bootstrap-5.3.5-dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.getElementById('predict-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const jsonData = {};
+      formData.forEach((value, key) => {
+        jsonData[key] = parseInt(value);
+      });
+
+      try {
+        const response = await fetch("/predict", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(jsonData)
+        });
+
+        const result = await response.json();
+
+        const predEl = document.getElementById('prediction-result');
+        const probEl = document.getElementById('probability-result');
+        const explainEl = document.getElementById('explanation');
+
+        if (result.prediction === 1) {
+          predEl.textContent = "Berisiko";
+          explainEl.textContent = "Pasien memiliki risiko terkena penyakit paru-paru. Disarankan untuk pemeriksaan lebih lanjut.";
+        } else {
+          predEl.textContent = "Tidak Berisiko";
+          explainEl.textContent = "Pasien tidak menunjukkan risiko signifikan. Tetap jaga kesehatan!";
+        }
+
+        probEl.textContent = result.probability.toFixed(4);
+
+        // Tampilkan modal
+        const resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
+        resultModal.show();
+
+      } catch (error) {
+        alert("Gagal melakukan prediksi.");
+        console.error(error);
+      }
+    });
+  </script>
+</body>
+</html>
